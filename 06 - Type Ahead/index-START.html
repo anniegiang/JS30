@@ -1,22 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Type Ahead 👀</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form class="search-form">
+      <input type="text" class="search" placeholder="City or State" />
+      <ul class="suggestions">
+        <li>Filter for a city</li>
+        <li>or a state</li>
+      </ul>
+    </form>
+    <script>
+      const endpoint =
+        "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
 
-  <form class="search-form">
-    <input type="text" class="search" placeholder="City or State">
-    <ul class="suggestions">
-      <li>Filter for a city</li>
-      <li>or a state</li>
-    </ul>
-  </form>
-<script>
-const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+      const locations = [];
+      fetch(endpoint)
+        .then(response => response.json())
+        .then(resource => locations.push(...resource))
+        .catch(error => console.log(error));
 
-</script>
-</body>
+      function displayMatches(matches, input) {
+        return matches
+          .map(match => {
+            const population = formatPopulation(match.population);
+            const city = replace(match.city, input);
+            const state = replace(match.state, input);
+            return `<li>
+              <span class="name">${city}, ${state}</span>
+              <span class="population">${population}</span>
+            </li>`;
+          })
+          .join("");
+      }
+
+      function search(query, data) {
+        return data.filter(obj => {
+          const regex = new RegExp(query, "gi");
+          return obj.city.match(regex) || obj.state.match(regex);
+        });
+      }
+
+      function handleInput() {
+        const input = this.value;
+        if (input) {
+          const matches = search(input, locations);
+          if (matches.length) {
+            suggestions.innerHTML = displayMatches(matches, input);
+          } else {
+            suggestions.innerHTML = `<li>No results</li>`;
+          }
+        } else {
+          suggestions.innerHTML = `<li>Filter for a city</li>
+        <li>or a state</li>`;
+        }
+      }
+
+      function replace(oldString, input) {
+        const regex = new RegExp(input, "gi");
+        return oldString.replace(regex, `<span class="hl">${input}</span>`);
+      }
+
+      function formatPopulation(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      const suggestions = document.querySelector(".suggestions");
+      const searchInput = document.querySelector(".search");
+      searchInput.addEventListener("input", handleInput);
+    </script>
+  </body>
 </html>
+
+`
