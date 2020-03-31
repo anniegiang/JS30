@@ -1,19 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>HTML5 Canvas</title>
-</head>
-<body>
-<canvas id="draw" width="800" height="800"></canvas>
-<script>
-</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Canvas</title>
+  </head>
+  <body>
+    <canvas id="draw" width="800" height="800"></canvas>
+    <button class="clear-board">Clear board</button>
+    <script>
+      const clearBoardBtn = document.querySelector(".clear-board");
+      const canvas = document.querySelector("#draw");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
 
-<style>
-  html, body {
-    margin: 0;
-  }
-</style>
+      let x = 0;
+      let y = 0;
+      let hue = 0;
+      let direction = true;
+      let drawing = false;
 
-</body>
+      canvas.addEventListener("mousedown", function(e) {
+        drawing = true;
+        x = e.clientX;
+        y = e.clientY;
+      });
+
+      canvas.addEventListener("mousemove", function(e) {
+        if (drawing) {
+          drawLine(ctx, x, y, e.clientX, e.clientY);
+          x = e.clientX;
+          y = e.clientY;
+        }
+      });
+
+      canvas.addEventListener("mouseup", function(e) {
+        drawing = false;
+        x, (y = 0);
+      });
+
+      clearBoardBtn.addEventListener("click", function(e) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      function drawLine(ctx, x1, y1, x2, y2) {
+        if (!drawing) return;
+        hue++;
+        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.closePath();
+
+        if (hue >= 360) {
+          hue = 0;
+        }
+
+        if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+          direction = !direction;
+        }
+
+        if (direction) {
+          ctx.lineWidth++;
+        } else {
+          ctx.lineWidth--;
+        }
+      }
+    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        position: relative;
+      }
+      button {
+        position: absolute;
+        top: 5%;
+        left: 5%;
+      }
+    </style>
+  </body>
 </html>
